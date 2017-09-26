@@ -6,12 +6,44 @@ from datetime import datetime
 import os
 
 
-class __Sender:
+class Sender:
+    """
+    Send email, message will be text or html format.
+    Example:
+        from sender import Sender
+        param = ['smtp.gmail.com',
+             'from@gmail.com',
+             'to@gmail.com',
+             'Subject',
+             '<H1>My perfect text</H1>',
+             'username',
+             'password',
+             465,
+             True,
+             True]
+         sender = Sender()
+         sender.send_email(*param)
+    >>> from sender import Sender
+    >>> sender = Sender()
+    >>> sender.send_email('smtp.gmail.com', 'from@mail.com', 'to@gmail.com', 'My subject', 'Text',\
+    'username', 'password', 465, True)
+    False
+    """
     __CURRENT_DATE = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+    __LOG_DEFAULT_FILENAME = 'sender.log'
 
-    def __init__(self, log=False, log_filename='./sender.log'):
-        self.__log = log
-        self.__log_filename = log_filename
+    def __init__(self):
+        self.__log = False
+        self.__log_filename = None
+
+    @property
+    def __get_log_filename(self):
+        return self.__log_filename
+
+    def __set_log_file(self, log_file):
+        if log_file is not None:
+            self.__log = True
+            self.__log_filename = log_file
 
     def __to_log(self, text, action):
         """
@@ -29,12 +61,18 @@ class __Sender:
         ]
         action = str(action).upper()
         if self.__log and action in actions:
-            mode = 'a' if os.path.isfile(self.__log_filename) else 'w'
-            logging.basicConfig(filename=self.__log_filename, level=eval('logging.' + action), filemode=mode)
-            eval("logging." + action.lower())('{0} - {1}'.format(self.__CURRENT_DATE, text))
+            try:
+                mode = 'a' if os.path.isfile(self.__get_log_filename) else 'w'
+                logging.basicConfig(filename=self.__get_log_filename, level=eval('logging.' + action), filemode=mode)
+                eval("logging." + action.lower())('{0} - {1}'.format(self.__CURRENT_DATE, text))
+            except FileNotFoundError:
+                self.__set_log_file(self.__LOG_DEFAULT_FILENAME)
+                self.__to_log(text, action)
+            except PermissionError as err:
+                print(err)
 
     def send_email(self, host, sender, recipients, subject, msg, user=None, password=None, port=25, ssl=False,
-                   debug=False):
+                   debug=False, log_file=None):
         """
         :param host: string
         :param sender: string - sender email
@@ -46,9 +84,11 @@ class __Sender:
         :param port: int - 25 default, 465 gmail ssl, 587 gmail ttl
         :param ssl: bool - False default
         :param debug: bool - False default
+        :param log_file: string - log file path /var/log/sender.log
         :return: True
         """
         try:
+            self.__set_log_file(log_file)
             msg = """From: <{0}>
     To: <{1}> 
     MIME-Version: 1.0
@@ -74,49 +114,16 @@ class __Sender:
                     return True
         except smtplib.SMTPAuthenticationError as err:
             self.__to_log('The server did not accept the username/password combination: {}'.format(err), 'error')
+            return False
         except smtplib.SMTPException as err:
             self.__to_log('Error send email: {}'.format(err), 'error')
+            return False
         except ConnectionRefusedError as err:
             self.__to_log('Connection refused error: {}'.format(err), 'error')
+            return False
         except TimeoutError as err:
             self.__to_log('Time out error: {}'.format(err), 'error')
-
-
-def send_email(host, sender, recipients, subject, massage, username=None, password=None, port=25, ssl=False,
-               debug=False, logging=False):
-    """
-    Send email, message will be text or html format.
-    Example:
-        param = ['smtp.gmail.com',
-             'from@gmail.com',
-             'to@gmail.com',
-             'Subject',
-             '<H1>My perfect text</H1>',
-             'username',
-             'password',
-             465,
-             True,
-             True,
-             True]
-         sender.send_email(*param)
-
-    :param host: string
-    :param sender: string - sender email
-    :param recipients: string - recipients email
-    :param subject: string
-    :param massage: string
-    :param username: string - username from email server
-    :param password: string - password
-    :param port: int - 25 default, 465 gmail ssl, 587 gmail ttl
-    :param ssl: bool - False default
-    :param debug: bool - False default
-    :param logging: bool - False default
-    :return: True
-    """
-    send = __Sender(logging)
-    send.send_email(host, sender, recipients, subject, massage, username, password, port, ssl,
-                    debug)
-
+            return False
 
 if __name__ == '__main__':
     import doctest
