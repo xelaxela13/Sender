@@ -1,7 +1,22 @@
 # Sender
 Simple python module for sending emails
 
-import sender
+Waiting params:
+    :param host: string
+    :param sender: string - sender email
+    :param recipients: string - recipients email
+    :param subject: string
+    :param massage: string
+    :param username: string - username from email server
+    :param password: string - password
+    :param port: int - 25 (default), 465 gmail ssl, 587 gmail ttl, or your any port
+    :param ssl: bool - False (default)
+    :param debug: bool - False (default)
+    :param logging: bool - False (default), use TRUE if you want create log file
+    :return: True
+
+Example:
+<code>import sender</code>
 
 <code>param = ['smtp.gmail.com',
          'from@gmail.com',
@@ -13,7 +28,7 @@ import sender
          465,
          True,
          True,
-         True]
+         True]</code>
 
-sender.send_email(*param)
-</code>
+<code>sender.send_email(*param)</code>
+
