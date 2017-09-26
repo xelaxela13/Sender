@@ -12,11 +12,11 @@ Waiting params:
     :param port: int - 25 (default), 465 gmail ssl, 587 gmail ttl, or your any port
     :param ssl: bool - False (default)
     :param debug: bool - False (default)
-    :param logging: bool - False (default), use TRUE if you want create log file
+    :param log_file: string - None (default), use '/var/log/sender.log' if you want create log file
     :return: True
 
 Example:
-<code>import sender</code>
+<code>from sender import Sender</code>
 
 <code>param = ['smtp.gmail.com',
          'from@gmail.com',
@@ -28,7 +28,7 @@ Example:
          465,
          True,
          True,
-         True]</code>
-
+         'sender.log']</code>
+<code>sender = Sender()</code>
 <code>sender.send_email(*param)</code>
 
