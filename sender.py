@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
+__author__ = "Alex Stepanenko"
+__version__ = "1.0.0"
+__copyright__ = "Copyright (c) 2017 Alex Stepanenko"
+__license__ = "MIT"
+
+__all__ = ['Sender']
+
 import smtplib
 import logging
 from datetime import datetime
-import os
+from os import path
 
 
 class Sender:
@@ -62,7 +69,7 @@ class Sender:
         action = str(action).upper()
         if self.__log and action in actions:
             try:
-                mode = 'a' if os.path.isfile(self.__get_log_filename) else 'w'
+                mode = 'a' if path.isfile(self.__get_log_filename) else 'w'
                 logging.basicConfig(filename=self.__get_log_filename, level=eval('logging.' + action), filemode=mode)
                 eval("logging." + action.lower())('{0} - {1}'.format(self.__CURRENT_DATE, text))
             except FileNotFoundError:
@@ -124,6 +131,7 @@ class Sender:
         except TimeoutError as err:
             self.__to_log('Time out error: {}'.format(err), 'error')
             return False
+
 
 if __name__ == '__main__':
     import doctest
